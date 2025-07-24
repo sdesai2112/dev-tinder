@@ -2,10 +2,29 @@ const express = require("express");
 
 const app = express();
 
+// ab?c - 'b' is optional: matches "/ac" or "/abc"
+app.get(/^\/ab?c$/, (req, res) => {
+  res.send("Call is Successful..!!");
+});
+
+// Accessing queries
 app.get("/user", (req, res) => {
+  console.log(req?.query);
+
   res.send({
     name: "Shraddha",
     surname: "Desai",
+  });
+});
+
+// Accessing request parameters
+app.get("/employee/:empId", (req, res) => {
+  console.log(req?.params);
+
+  res.send({
+    name: "Shraddha",
+    surname: "Desai",
+    message: "It is employee route",
   });
 });
 
