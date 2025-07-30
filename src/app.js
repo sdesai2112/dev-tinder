@@ -1,4 +1,5 @@
 const express = require("express");
+const { adminAuth, userAuth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -39,7 +40,15 @@ app.get("/employee/:empId", (req, res) => {
   });
 });
 
-app.post("/user", (req, res) => {
+app.get("/admin/getAllData", adminAuth, (req, res) => {
+  res.send("Fetched all employee data successfully..!!");
+});
+
+app.delete("/admin/deleteAllData", adminAuth, (req, res) => {
+  res.send("Deleted employee successfully..!!");
+});
+
+app.post("/user", userAuth, (req, res) => {
   console.log("Saving data to DB....");
   res.send("Saved data to Database..!!");
 });
