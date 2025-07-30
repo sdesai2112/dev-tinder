@@ -7,15 +7,26 @@ app.get(/^\/ab?c$/, (req, res) => {
   res.send("Call is Successful..!!");
 });
 
-// Accessing queries
-app.get("/user", (req, res) => {
-  console.log(req?.query);
-
-  res.send({
-    name: "Shraddha",
-    surname: "Desai",
-  });
+app.get("/", (req, res) => {
+  res.send("This is the response from general route");
 });
+
+// Accessing queries
+app.get(
+  "/user",
+  (req, res, next) => {
+    console.log(req?.query);
+    next();
+    // res.send({
+    //   name: "Shraddha",
+    //   surname: "Desai",
+    // });
+  },
+  (req, res, next1) => {
+    // next1();
+    res.send("2nd Response");
+  }
+);
 
 // Accessing request parameters
 app.get("/employee/:empId", (req, res) => {
