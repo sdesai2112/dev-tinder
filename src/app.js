@@ -54,7 +54,12 @@ app.post("/user", userAuth, (req, res) => {
 });
 
 app.use("/test", (req, res) => {
+  throw new Error("This is a test error");
   res.send("Hello from Server..!!");
+});
+
+app.use("/", (err, req, res, next) => {
+  res.status(500).send("Something Went Wrong..!!");
 });
 
 app.listen(3000, () => {
