@@ -42,7 +42,6 @@ const userSchema = new Schema(
           throw new Error("Invalid value for Gender");
         }
       },
-      required: true,
     },
     photoUrl: {
       type: String,
