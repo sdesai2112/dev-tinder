@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validate");
+const { userAuth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -122,20 +123,20 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/profile", async (req, res) => {
+app.post("/profile", userAuth, async (req, res) => {
   try {
-    const { token } = req.cookies;
-
-    if (!token) {
-      throw new Error("Please Login");
-    }
-
-    const decodedMessage = jwt.verify(token, "Shraddha@123");
-    const user = await User.findById(decodedMessage._id);
-
-    res.json(user);
+    res.json(req.user);
   } catch (err) {
     res.status(400).json("PROFILE ERROR: " + err?.message);
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  try {
+    console.log("Connection Request Sent..!!");
+    res.json(req?.user?.firstName + " sent a connection request");
+  } catch (err) {
+    res.status(500).json("CONNECTION ERROR: " + err?.message);
   }
 });
 
