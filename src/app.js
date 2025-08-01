@@ -112,9 +112,14 @@ app.post("/login", async (req, res) => {
     const isValidUser = await bcrypt.compare(password, user?.password);
 
     if (isValidUser) {
-      const token = jwt.sign({ _id: user._id }, "Shraddha@123");
+      const token = jwt.sign({ _id: user._id }, "Shraddha@123", {
+        expiresIn: "3h",
+      });
 
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 3600000), // 1 hour
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      });
 
       res.json("Successful Login");
     }
