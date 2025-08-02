@@ -43,8 +43,6 @@ requestRouter.post(
         ],
       });
 
-      console.log("isConnectionReqExists", isConnectionReqExists);
-
       if (isConnectionReqExists) {
         throw new Error("Connection Already Exists");
       }
@@ -60,6 +58,46 @@ requestRouter.post(
       res.json({
         message: "Connection Request Sent",
         data,
+      });
+    } catch (err) {
+      res.status(400).json("CONNECTION ERROR: " + err?.message);
+    }
+  }
+);
+
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const ALLOWED_STATUSES = ["accepted", "rejected"];
+
+      const status = req.params.status;
+
+      if (!ALLOWED_STATUSES.includes(status)) {
+        throw new Error("Invalid Request Status " + status);
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        toUserId: req.user._id,
+        _id: req.params.requestId,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        throw new Error("Invalid Connection Request");
+      }
+
+      const updateReviewStatus = await ConnectionRequest.findOneAndUpdate(
+        {
+          _id: req.params.requestId,
+        },
+        { status: status }
+      );
+
+      res.json({
+        message: "Connection Request Reviewed",
+        updateReviewStatus,
       });
     } catch (err) {
       res.status(400).json("CONNECTION ERROR: " + err?.message);
