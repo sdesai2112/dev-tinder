@@ -1,70 +1,50 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const { userAuth } = require("../middlewares/auth");
+const { validateProfileEditData } = require("../utils/validate");
 
 const profileRouter = express.Router();
 
-profileRouter.get("/user", async (req, res) => {
-  try {
-    const user = await User.findOne({ emailId: req.body.emailId });
-    if (!user) {
-      res.status(404).send("User not found");
-    }
-    res.json(user);
-  } catch (err) {
-    console.log("Error while fetching users", err);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-profileRouter.delete("/user", async (req, res) => {
-  try {
-    const deleteData = await User.findByIdAndDelete(req.body.id);
-    res.json("User Deleted Suucessfully");
-  } catch (err) {
-    console.log("Error while deleting user", err);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-profileRouter.patch("/user/:id", async (req, res) => {
-  try {
-    const ALLOWED_UPDATES = [
-      "firstName",
-      "lastName",
-      "gender",
-      "age",
-      "photoUrl",
-      "about",
-      "skills",
-    ];
-    const isUpdateAllowed = Object.keys(req.body).every((key) =>
-      ALLOWED_UPDATES.includes(key)
-    );
-
-    if (!isUpdateAllowed) {
-      throw new Error("Invalid Update");
-    }
-
-    if (req.body?.skills?.length > 10) {
-      throw new Error("Skills cannot be more than 10");
-    }
-
-    await User.findByIdAndUpdate(req.params?.id, req.body, {
-      runValidators: true,
-    });
-    res.json("User Updated Suucessfully");
-  } catch (err) {
-    console.log("Error while updating user", err);
-    res.status(400).send("INVALID UPDATE: " + err?.message);
-  }
-});
-
-profileRouter.post("/profile", userAuth, async (req, res) => {
+profileRouter.post("/profile/view", userAuth, async (req, res) => {
   try {
     res.json(req.user);
   } catch (err) {
     res.status(400).json("PROFILE ERROR: " + err?.message);
+  }
+});
+
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+  try {
+    validateProfileEditData(req);
+
+    const profileUpdateData = await User.findByIdAndUpdate(
+      { _id: req.user._id },
+      req.body
+    );
+
+    res.json(
+      profileUpdateData.firstName + " your profile updated successfully."
+    );
+  } catch (err) {
+    res.status(500).json("PROFILE UPDATE ERROR: " + err?.message);
+  }
+});
+
+profileRouter.patch("/profile/edit/password", userAuth, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    const newPasswordHash = await bcrypt.hash(password, 10);
+
+    await User.findByIdAndUpdate(
+      { _id: req.user._id },
+      { password: newPasswordHash }
+    );
+
+    res.json("Password Updated Successfully");
+  } catch (err) {
+    res.status(400).json("PASSWORD UPDATE ERROR: " + err.message);
   }
 });
 
