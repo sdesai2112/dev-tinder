@@ -10,7 +10,8 @@ const connectionRequestSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
-    requestStatus: {
+    status: {
+      type: String,
       enum: {
         values: ["interested", "ignored", "accepted", "rejected"],
         message: "{VALUE} is not a valid request status",
@@ -19,5 +20,17 @@ const connectionRequestSchema = new Schema(
   },
   { timestamps: true }
 );
+
+connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 }, { unique: true });
+
+connectionRequestSchema.pre("save", function (next) {
+  const connectionRequest = this;
+
+  if (connectionRequest.fromUserId.equals(connectionRequest.toUserId)) {
+    throw new Error("Cannot send request to self");
+  }
+
+  next();
+});
 
 module.exports = new model("ConnectionRequest", connectionRequestSchema);
