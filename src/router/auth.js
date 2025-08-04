@@ -46,7 +46,7 @@ authRouter.post("/login", async (req, res) => {
         secure: process.env.NODE_ENV === "production", // Use secure cookies in production
       });
 
-      res.json("Successful Login");
+      res.json(user);
     }
   } catch (err) {
     res.status(400).json("LOGIN ERROR: " + err?.message);
