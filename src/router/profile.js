@@ -6,7 +6,7 @@ const { validateProfileEditData } = require("../utils/validate");
 
 const profileRouter = express.Router();
 
-profileRouter.post("/profile/view", userAuth, async (req, res) => {
+profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     res.json(req.user);
   } catch (err) {
@@ -23,9 +23,11 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       req.body
     );
 
-    res.json(
-      profileUpdateData.firstName + " your profile updated successfully."
-    );
+    res.json({
+      message:
+        profileUpdateData.firstName + " your profile updated successfully.",
+      data: profileUpdateData,
+    });
   } catch (err) {
     res.status(500).json("PROFILE UPDATE ERROR: " + err?.message);
   }
